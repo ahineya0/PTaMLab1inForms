@@ -16,13 +16,11 @@ namespace MultiLinkedLists
         private void LoadTree()
         {
             treeView1.Nodes.Clear();
-            // Show deleted components too so their specs can be restored
             var components = FileManager.Instance.GetAllComponents(includeDeleted: true);
 
             foreach (var c in components)
             {
-                // Node label: show [DELETED] tag for deleted parent components
-                string parentLabel = c.IsDeleted ? $"[DELETED] {c.Name}" : c.Name;
+                string parentLabel = c.IsDeleted ? $"[УДАЛЁН] {c.Name}" : c.Name;
                 var node = new TreeNode(parentLabel) { Tag = c };
 
                 if (c.IsDeleted)
@@ -31,7 +29,6 @@ namespace MultiLinkedLists
                     node.NodeFont = new Font(treeView1.Font, FontStyle.Strikeout);
                 }
 
-                // GetSpecifications includes deleted spec records when includeDeleted=true
                 if (c.SpecHead != -1)
                 {
                     var specs = FileManager.Instance.GetSpecifications(c.SpecHead, includeDeleted: true);
@@ -40,9 +37,8 @@ namespace MultiLinkedLists
                         var child = components.Find(x => x.Offset == s.CompOffset);
                         if (child == null) continue;
 
-                        // Show quantity (x N) and deleted state
                         string childLabel = s.IsDeleted
-                            ? $"[DELETED] {child.Name}  ×{s.Count}"
+                            ? $"[УДАЛЁН] {child.Name}  ×{s.Count}"
                             : $"{child.Name}  ×{s.Count}";
 
                         var childNode = new TreeNode(childLabel)
@@ -75,7 +71,7 @@ namespace MultiLinkedLists
             {
                 if (c.Name.ToLower().Contains(search))
                 {
-                    string label = c.IsDeleted ? $"[DELETED] {c.Name}" : c.Name;
+                    string label = c.IsDeleted ? $"[УДАЛЁН] {c.Name}" : c.Name;
                     var node = new TreeNode(label) { Tag = c };
                     if (c.IsDeleted) node.ForeColor = Color.Gray;
                     treeView1.Nodes.Add(node);
@@ -119,7 +115,7 @@ namespace MultiLinkedLists
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -132,8 +128,8 @@ namespace MultiLinkedLists
             var child = (Component)tags[1];
 
             var r = MessageBox.Show(
-                $"Remove '{child.Name}' from specification of '{parent.Name}'?",
-                "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                $"Удалить '{child.Name}' из спецификации '{parent.Name}'?",
+                "Подтвердить", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (r == DialogResult.Yes)
             {
                 try
@@ -143,7 +139,7 @@ namespace MultiLinkedLists
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -162,7 +158,7 @@ namespace MultiLinkedLists
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

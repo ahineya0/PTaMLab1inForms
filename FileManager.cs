@@ -64,8 +64,8 @@ namespace MultiLinkedLists
                     if (b1 == 'P' && b2 == 'S')
                     {
                         var r = System.Windows.Forms.MessageBox.Show(
-                            $"File '{filename}' already exists. Overwrite?",
-                            "Confirm",
+                            $"Файл '{filename}' уже существует. Перезаписать?",
+                            "Подтвердить",
                             System.Windows.Forms.MessageBoxButtons.YesNo,
                             System.Windows.Forms.MessageBoxIcon.Question);
                         if (r != System.Windows.Forms.DialogResult.Yes)
@@ -109,7 +109,7 @@ namespace MultiLinkedLists
             if (_compReader.ReadByte() != 'P' || _compReader.ReadByte() != 'S')
             {
                 Close();
-                throw new Exception("Invalid file signature.");
+                throw new Exception("Неправильная сигнатура файла.");
             }
 
             _compReader.ReadInt16();
@@ -125,7 +125,7 @@ namespace MultiLinkedLists
             if (!File.Exists(prsFromHeader))
             {
                 Close();
-                throw new Exception("Specification file not found.");
+                throw new Exception("Файл спецификаций не найден.");
             }
 
             SpecFile = prsFromHeader;
@@ -141,12 +141,6 @@ namespace MultiLinkedLists
             _compFs = null; _compReader = null; _compWriter = null;
             _specReader?.Close(); _specWriter?.Close(); _specFs?.Close();
             _specFs = null; _specReader = null; _specWriter = null;
-        }
-
-        private short GetMaxLen()
-        {
-            _compFs.Seek(2, SeekOrigin.Begin);
-            return _compReader.ReadInt16();
         }
 
         private int GetHead()
@@ -233,7 +227,7 @@ namespace MultiLinkedLists
         public void DeleteComponent(int offset)
         {
             if (IsComponentReferenced(offset))
-                throw new Exception("Cannot delete: component is referenced in specifications.");
+                throw new Exception("Невозможно удалить: компонент упоминается в спецификации.");
 
             _compFs.Seek(offset + 1, SeekOrigin.Begin);
             int specHead = _compReader.ReadInt32();
@@ -392,7 +386,7 @@ namespace MultiLinkedLists
         {
             _compFs.Seek(parentOffset + 1, SeekOrigin.Begin);
             int specHead = _compReader.ReadInt32();
-            if (specHead == -1) throw new Exception("This component has no specifications.");
+            if (specHead == -1) throw new Exception("У этого компонента нет спецификации.");
 
             int cur = specHead;
             while (cur != -1)
@@ -411,7 +405,7 @@ namespace MultiLinkedLists
                 }
                 cur = next;
             }
-            throw new Exception("Deleted specification not found.");
+            throw new Exception("Удалённая спецификация не найдена.");
         }
 
         public void AddSpec(int parentOffset, int childOffset)
@@ -422,10 +416,10 @@ namespace MultiLinkedLists
             _compReader.ReadInt32();
             byte parentType = _compReader.ReadByte();
             if ((ComponentType)parentType == ComponentType.Detail)
-                throw new Exception("A Detail component cannot contain specifications.");
+                throw new Exception("Деталь не может иметь спецификацию.");
 
             if (parentOffset == childOffset)
-                throw new Exception("A component cannot reference itself.");
+                throw new Exception("Компонент не может иметь себя в спецификации.");
 
             int cur = specHead;
             while (cur != -1)
@@ -464,7 +458,7 @@ namespace MultiLinkedLists
         {
             _compFs.Seek(parentOffset + 1, SeekOrigin.Begin);
             int specHead = _compReader.ReadInt32();
-            if (specHead == -1) throw new Exception("This component has no specifications.");
+            if (specHead == -1) throw new Exception("Этот компонент не имеет спецификации.");
 
             int cur = specHead, prev = -1;
             while (cur != -1)
@@ -501,7 +495,7 @@ namespace MultiLinkedLists
                 }
                 prev = cur; cur = next;
             }
-            throw new Exception("Specification not found.");
+            throw new Exception("Спецификация не найдена.");
         }
 
         private bool IsComponentReferenced(int componentOffset)

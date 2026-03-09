@@ -31,7 +31,7 @@ namespace MultiLinkedLists
             txtSearch.TabIndex = 0;
             txtSearch.KeyDown += (s, e) => { if (e.KeyCode == Keys.Enter) btnFind_Click(s, e); };
 
-            btnFind.Text = "Find";
+            btnFind.Text = "Найти";
             btnFind.Location = new Point(296, 7);
             btnFind.Size = new Size(80, 25);
             btnFind.TabIndex = 1;
@@ -43,9 +43,9 @@ namespace MultiLinkedLists
             treeView1.ContextMenuStrip = contextMenu;
             treeView1.NodeMouseClick += treeView1_NodeMouseClick;
 
-            menuItemAdd.Text = "Add";
-            menuItemDelete.Text = "Delete";
-            menuItemRestore.Text = "Restore";
+            menuItemAdd.Text = "Добавить";
+            menuItemDelete.Text = "Удалить";
+            menuItemRestore.Text = "Восстановить";
 
             menuItemAdd.Click += menuItemAdd_Click;
             menuItemDelete.Click += menuItemDelete_Click;
@@ -60,7 +60,7 @@ namespace MultiLinkedLists
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(416, 412);
             Controls.AddRange(new Control[] { txtSearch, btnFind, treeView1 });
-            Text = "Specification";
+            Text = "Спецификация";
             StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;

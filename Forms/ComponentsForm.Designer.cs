@@ -43,13 +43,13 @@ namespace MultiLinkedLists
             menuStrip1.Size = new Size(620, 24);
             menuStrip1.TabStop = false;
 
-            btnAdd.Text = "Add";
-            btnEdit.Text = "Edit";
-            btnCancel.Text = "Cancel";
-            btnSave.Text = "Save";
-            btnDelete.Text = "Delete";
-            btnRestore.Text = "Restore";
-            btnRestoreAll.Text = "Restore All";
+            btnAdd.Text = "Добавить";
+            btnEdit.Text = "Изменить";
+            btnCancel.Text = "Отмена";
+            btnSave.Text = "Сохранить";
+            btnDelete.Text = "Удалить";
+            btnRestore.Text = "Восстановить";
+            btnRestoreAll.Text = "Восстановить всё";
 
             btnAdd.Click += btnAdd_Click;
             btnEdit.Click += btnEdit_Click;
@@ -72,18 +72,18 @@ namespace MultiLinkedLists
             listView1.MultiSelect = false;
             listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
 
-            colName.Text = "Name";
+            colName.Text = "Имя";
             colName.Width = 280;
-            colType.Text = "Type";
+            colType.Text = "Тип";
             colType.Width = 160;
-            colStatus.Text = "Status";
+            colStatus.Text = "Статус";
             colStatus.Width = 177;
 
             panelBottom.Location = new Point(0, 284);
             panelBottom.Size = new Size(620, 36);
             panelBottom.BorderStyle = BorderStyle.FixedSingle;
 
-            lblName.Text = "Name";
+            lblName.Text = "Имя";
             lblName.Location = new Point(4, 10);
             lblName.AutoSize = true;
 
@@ -91,7 +91,7 @@ namespace MultiLinkedLists
             txtName.Size = new Size(290, 23);
             txtName.Enabled = false;
 
-            lblType.Text = "Type";
+            lblType.Text = "Тип";
             lblType.Location = new Point(362, 10);
             lblType.AutoSize = true;
 
@@ -108,7 +108,7 @@ namespace MultiLinkedLists
             ClientSize = new Size(620, 322);
             Controls.AddRange(new Control[] { menuStrip1, listView1, panelBottom });
             MainMenuStrip = menuStrip1;
-            Text = "Component List";
+            Text = "Список компонентов";
             StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;

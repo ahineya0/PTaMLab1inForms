@@ -9,7 +9,6 @@ namespace MultiLinkedLists
         private bool _editing = false;
         private int _selectedOffset = -1;
 
-        // Colours for deleted rows
         private static readonly Color DeletedFore = Color.Gray;
         private static readonly Color DeletedBack = Color.FromArgb(245, 245, 245);
 
@@ -22,19 +21,17 @@ namespace MultiLinkedLists
         private void LoadComponents()
         {
             listView1.Items.Clear();
-            // Pass includeDeleted=true so deleted records are visible
             foreach (var c in FileManager.Instance.GetAllComponents(includeDeleted: true))
             {
                 var item = new ListViewItem(c.Name);
                 item.SubItems.Add(c.Type.ToString());
-                item.SubItems.Add(c.IsDeleted ? "Deleted" : "Active");
+                item.SubItems.Add(c.IsDeleted ? "Удалённый" : "Активный");
                 item.Tag = c;
 
                 if (c.IsDeleted)
                 {
                     item.ForeColor = DeletedFore;
                     item.BackColor = DeletedBack;
-                    // Strikethrough font to make it extra obvious
                     item.Font = new Font(listView1.Font, FontStyle.Strikeout);
                 }
 
@@ -58,7 +55,7 @@ namespace MultiLinkedLists
             var c = (Component)listView1.SelectedItems[0].Tag;
             if (c.IsDeleted)
             {
-                MessageBox.Show("Cannot edit a deleted record. Restore it first.", "Error",
+                MessageBox.Show("Нельзя редактировать удалённую запись. Сперва восстановите её.", "Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -73,12 +70,12 @@ namespace MultiLinkedLists
         {
             if (string.IsNullOrWhiteSpace(txtName.Text))
             {
-                MessageBox.Show("Enter a name.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Введите имя.", "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             if (cmbType.SelectedIndex < 0)
             {
-                MessageBox.Show("Select a type.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Выберите тип.", "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -95,7 +92,7 @@ namespace MultiLinkedLists
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -110,11 +107,11 @@ namespace MultiLinkedLists
             var c = (Component)listView1.SelectedItems[0].Tag;
             if (c.IsDeleted)
             {
-                MessageBox.Show("This record is already deleted.", "Error",
+                MessageBox.Show("Эта запись уже удалена.", "Ошибка.",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            var r = MessageBox.Show($"Mark component '{c.Name}' as deleted?", "Confirm",
+            var r = MessageBox.Show($"Пометить компонент '{c.Name}' как удалённый?", "Подтвердить",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (r == DialogResult.Yes)
             {
@@ -125,7 +122,7 @@ namespace MultiLinkedLists
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -136,7 +133,7 @@ namespace MultiLinkedLists
             var c = (Component)listView1.SelectedItems[0].Tag;
             if (!c.IsDeleted)
             {
-                MessageBox.Show("This record is not deleted.", "Error",
+                MessageBox.Show("Эта запись не удалена.", "Ошибка.",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -147,13 +144,13 @@ namespace MultiLinkedLists
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void btnRestoreAll_Click(object sender, EventArgs e)
         {
-            var r = MessageBox.Show("Restore all deleted records?", "Confirm",
+            var r = MessageBox.Show("Восстановить все удалённые записи?", "Подтвердить",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (r == DialogResult.Yes)
             {
@@ -164,7 +161,7 @@ namespace MultiLinkedLists
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
