@@ -20,9 +20,12 @@ namespace MultiLinkedLists
             btnCancel = new ToolStripMenuItem();
             btnSave = new ToolStripMenuItem();
             btnDelete = new ToolStripMenuItem();
+            btnRestore = new ToolStripMenuItem();
+            btnRestoreAll = new ToolStripMenuItem();
             listView1 = new ListView();
             colName = new ColumnHeader();
             colType = new ColumnHeader();
+            colStatus = new ColumnHeader();
             lblName = new Label();
             txtName = new TextBox();
             lblType = new Label();
@@ -33,73 +36,79 @@ namespace MultiLinkedLists
             panelBottom.SuspendLayout();
             SuspendLayout();
 
-            // menuStrip
-            menuStrip1.Items.AddRange(new ToolStripItem[] { btnAdd, btnEdit, btnCancel, btnSave, btnDelete });
+            menuStrip1.Items.AddRange(new ToolStripItem[] {
+                btnAdd, btnEdit, btnCancel, btnSave, btnDelete, btnRestore, btnRestoreAll
+            });
             menuStrip1.Location = new Point(0, 0);
-            menuStrip1.Size = new Size(560, 24);
+            menuStrip1.Size = new Size(620, 24);
             menuStrip1.TabStop = false;
 
-            btnAdd.Text = "Добавить";
-            btnEdit.Text = "Изменить";
-            btnCancel.Text = "Отменить";
-            btnSave.Text = "Сохранить";
-            btnDelete.Text = "Удалить";
+            btnAdd.Text = "Add";
+            btnEdit.Text = "Edit";
+            btnCancel.Text = "Cancel";
+            btnSave.Text = "Save";
+            btnDelete.Text = "Delete";
+            btnRestore.Text = "Restore";
+            btnRestoreAll.Text = "Restore All";
 
             btnAdd.Click += btnAdd_Click;
             btnEdit.Click += btnEdit_Click;
             btnCancel.Click += btnCancel_Click;
             btnSave.Click += btnSave_Click;
             btnDelete.Click += btnDelete_Click;
+            btnRestore.Click += btnRestore_Click;
+            btnRestoreAll.Click += btnRestoreAll_Click;
 
             btnSave.Enabled = false;
             btnCancel.Enabled = false;
+            btnRestore.Enabled = false;
 
-            // listView1
-            listView1.Columns.AddRange(new ColumnHeader[] { colName, colType });
+            listView1.Columns.AddRange(new ColumnHeader[] { colName, colType, colStatus });
             listView1.FullRowSelect = true;
             listView1.GridLines = true;
             listView1.Location = new Point(0, 24);
-            listView1.Size = new Size(560, 260);
+            listView1.Size = new Size(620, 260);
             listView1.View = View.Details;
             listView1.MultiSelect = false;
             listView1.SelectedIndexChanged += listView1_SelectedIndexChanged;
 
-            colName.Text = "Наименование";
-            colName.Width = 300;
-            colType.Text = "Тип";
-            colType.Width = 257;
+            colName.Text = "Name";
+            colName.Width = 280;
+            colType.Text = "Type";
+            colType.Width = 160;
+            colStatus.Text = "Status";
+            colStatus.Width = 177;
 
-            // panelBottom
             panelBottom.Location = new Point(0, 284);
-            panelBottom.Size = new Size(560, 36);
+            panelBottom.Size = new Size(620, 36);
             panelBottom.BorderStyle = BorderStyle.FixedSingle;
 
-            lblName.Text = "Наименование";
+            lblName.Text = "Name";
             lblName.Location = new Point(4, 10);
             lblName.AutoSize = true;
 
-            txtName.Location = new Point(100, 7);
-            txtName.Size = new Size(250, 23);
+            txtName.Location = new Point(60, 7);
+            txtName.Size = new Size(290, 23);
             txtName.Enabled = false;
 
-            lblType.Text = "Тип";
-            lblType.Location = new Point(360, 10);
+            lblType.Text = "Type";
+            lblType.Location = new Point(362, 10);
             lblType.AutoSize = true;
 
-            cmbType.Location = new Point(385, 7);
-            cmbType.Size = new Size(120, 23);
+            cmbType.Location = new Point(395, 7);
+            cmbType.Size = new Size(110, 23);
             cmbType.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbType.Items.AddRange(new object[] { "Изделие", "Узел", "Деталь" });
+            cmbType.Items.AddRange(new object[] { "Product", "Unit", "Detail" });
             cmbType.Enabled = false;
 
             panelBottom.Controls.AddRange(new Control[] { lblName, txtName, lblType, cmbType });
 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(560, 322);
+            ClientSize = new Size(620, 322);
             Controls.AddRange(new Control[] { menuStrip1, listView1, panelBottom });
             MainMenuStrip = menuStrip1;
-            Text = "Список компонентов";
+            Text = "Component List";
             StartPosition = FormStartPosition.CenterParent;
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
@@ -118,9 +127,12 @@ namespace MultiLinkedLists
         private ToolStripMenuItem btnCancel;
         private ToolStripMenuItem btnSave;
         private ToolStripMenuItem btnDelete;
+        private ToolStripMenuItem btnRestore;
+        private ToolStripMenuItem btnRestoreAll;
         private ListView listView1;
         private ColumnHeader colName;
         private ColumnHeader colType;
+        private ColumnHeader colStatus;
         private Label lblName;
         private TextBox txtName;
         private Label lblType;
