@@ -1,5 +1,6 @@
 using MultiLinkedLists.Forms;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -7,6 +8,8 @@ namespace MultiLinkedLists
 {
     public partial class SpecificationForm : Form
     {
+        private List<Component> _allComponents;
+
         public SpecificationForm()
         {
             InitializeComponent();
@@ -15,50 +18,60 @@ namespace MultiLinkedLists
 
         private void LoadTree()
         {
+            treeView1.BeginUpdate();
             treeView1.Nodes.Clear();
-            var components = FileManager.Instance.GetAllComponents(includeDeleted: true);
+            _allComponents = FileManager.Instance.GetAllComponents(includeDeleted: true);
 
-            foreach (var c in components)
+            foreach (var c in _allComponents)
             {
-                string parentLabel = c.IsDeleted ? $"[УДАЛЁН] {c.Name}" : c.Name;
-                var node = new TreeNode(parentLabel) { Tag = c };
-
-                if (c.IsDeleted)
-                {
-                    node.ForeColor = Color.Gray;
-                    node.NodeFont = new Font(treeView1.Font, FontStyle.Strikeout);
-                }
-
-                if (c.SpecHead != -1)
-                {
-                    var specs = FileManager.Instance.GetSpecifications(c.SpecHead, includeDeleted: true);
-                    foreach (var s in specs)
-                    {
-                        var child = components.Find(x => x.Offset == s.CompOffset);
-                        if (child == null) continue;
-
-                        string childLabel = s.IsDeleted
-                            ? $"[УДАЛЁН] {child.Name}  ×{s.Count}"
-                            : $"{child.Name}  ×{s.Count}";
-
-                        var childNode = new TreeNode(childLabel)
-                        {
-                            Tag = new object[] { c, child, s }
-                        };
-
-                        if (s.IsDeleted)
-                        {
-                            childNode.ForeColor = Color.Gray;
-                            childNode.NodeFont = new Font(treeView1.Font, FontStyle.Strikeout);
-                        }
-
-                        node.Nodes.Add(childNode);
-                    }
-                }
-
+                // В верхнем уровне отображаем каждый компонент как корневой узел.
+                var node = MakeComponentNode(c, visitedOffsets: new HashSet<int>());
                 treeView1.Nodes.Add(node);
             }
+
             treeView1.ExpandAll();
+            treeView1.EndUpdate();
+        }
+
+        private TreeNode MakeComponentNode(Component comp, HashSet<int> visitedOffsets)
+        {
+            string label = comp.IsDeleted ? $"[УДАЛЁН] {comp.Name}" : comp.Name;
+            var node = new TreeNode(label) { Tag = comp };
+            ApplyDeletedStyle(node, comp.IsDeleted);
+
+            if (comp.SpecHead == -1) return node;
+
+            // Защита от циклических ссылок.
+            if (visitedOffsets.Contains(comp.Offset)) return node;
+            visitedOffsets.Add(comp.Offset);
+
+            var specs = FileManager.Instance.GetSpecifications(comp.SpecHead, includeDeleted: true);
+            foreach (var s in specs)
+            {
+                var child = _allComponents.Find(x => x.Offset == s.CompOffset);
+                if (child == null) continue;
+
+                string childLabel = s.IsDeleted ? $"[УДАЛЁН] {child.Name}  ×{s.Count}" : $"{child.Name}  ×{s.Count}";
+
+                // Рекурсивный подход.
+                var childNode = MakeComponentNode(child, new HashSet<int>(visitedOffsets));
+                childNode.Text = childLabel;
+                childNode.Tag = new object[] { comp, child, s };
+
+                if (s.IsDeleted) ApplyDeletedStyle(childNode, true);
+
+                node.Nodes.Add(childNode);
+            }
+
+            visitedOffsets.Remove(comp.Offset);
+            return node;
+        }
+
+        private static void ApplyDeletedStyle(TreeNode node, bool deleted)
+        {
+            if (!deleted) return;
+            node.ForeColor = Color.Gray;
+            node.NodeFont = new Font(SystemFonts.DefaultFont, FontStyle.Strikeout);
         }
 
         private void btnFind_Click(object sender, EventArgs e)
@@ -66,17 +79,19 @@ namespace MultiLinkedLists
             string search = txtSearch.Text.Trim().ToLower();
             if (string.IsNullOrEmpty(search)) { LoadTree(); return; }
 
+            treeView1.BeginUpdate();
             treeView1.Nodes.Clear();
-            foreach (var c in FileManager.Instance.GetAllComponents(includeDeleted: true))
+            _allComponents = FileManager.Instance.GetAllComponents(includeDeleted: true);
+
+            foreach (var c in _allComponents)
             {
-                if (c.Name.ToLower().Contains(search))
-                {
-                    string label = c.IsDeleted ? $"[УДАЛЁН] {c.Name}" : c.Name;
-                    var node = new TreeNode(label) { Tag = c };
-                    if (c.IsDeleted) node.ForeColor = Color.Gray;
-                    treeView1.Nodes.Add(node);
-                }
+                if (!c.Name.ToLower().Contains(search)) continue;
+                // Отображаем найденный компонент вместе с его полным рекурсивным поддеревом.
+                treeView1.Nodes.Add(MakeComponentNode(c, new HashSet<int>()));
             }
+
+            treeView1.ExpandAll();
+            treeView1.EndUpdate();
         }
 
         private void contextMenu_Opening(object sender, System.ComponentModel.CancelEventArgs e)
@@ -84,20 +99,19 @@ namespace MultiLinkedLists
             var node = treeView1.SelectedNode;
             if (node == null) { e.Cancel = true; return; }
 
-            bool isRoot = node.Parent == null;
+            bool isSpecEntry = node.Tag is object[];   // child node = spec link
             bool isDeleted = false;
 
-            if (isRoot && node.Tag is Component rc)
+            if (!isSpecEntry && node.Tag is Component rc)
                 isDeleted = rc.IsDeleted;
-            else if (!isRoot && node.Tag is object[] tags && tags[2] is SpecRecord sr)
+            else if (isSpecEntry && node.Tag is object[] tags && tags[2] is SpecRecord sr)
                 isDeleted = sr.IsDeleted;
 
-            menuItemAdd.Enabled = isRoot
-                                      && node.Tag is Component comp
-                                      && !comp.IsDeleted
-                                      && comp.Type != ComponentType.Detail;
-            menuItemDelete.Enabled = !isRoot && !isDeleted;
-            menuItemRestore.Enabled = !isRoot && isDeleted;
+            // "Добавить" только на не удаляемый компонент и не деталь
+            menuItemAdd.Enabled = !isSpecEntry && node.Tag is Component comp && !comp.IsDeleted && comp.Type != ComponentType.Detail;
+
+            menuItemDelete.Enabled = isSpecEntry && !isDeleted;
+            menuItemRestore.Enabled = isSpecEntry && isDeleted;
         }
 
         private void menuItemAdd_Click(object sender, EventArgs e)
@@ -115,7 +129,7 @@ namespace MultiLinkedLists
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -128,8 +142,7 @@ namespace MultiLinkedLists
             var child = (Component)tags[1];
 
             var r = MessageBox.Show(
-                $"Удалить '{child.Name}' из спецификации '{parent.Name}'?",
-                "Подтвердить", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                $"Убрать '{child.Name}' из спецификации '{parent.Name}'?", "Подтвердить", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (r == DialogResult.Yes)
             {
                 try
@@ -139,7 +152,7 @@ namespace MultiLinkedLists
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -158,7 +171,7 @@ namespace MultiLinkedLists
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Ошибка.", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
